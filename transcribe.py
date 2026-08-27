@@ -4,6 +4,8 @@ Il valore "nostro" qui e' l'iniezione del glossario via initial_prompt, non il m
 """
 import mlx_whisper
 
+import audio
+
 # nome breve in config.yaml -> repo HuggingFace (scaricato una volta da download_models.py)
 REPOS = {
     "small": "mlx-community/whisper-small-mlx",
@@ -32,7 +34,7 @@ def run(wav_path, cfg, language=None):
     if lang == "auto":
         lang = None
     result = mlx_whisper.transcribe(
-        str(wav_path),
+        audio.load_wav(wav_path),  # array 16kHz: mlx-whisper non invoca ffmpeg
         path_or_hf_repo=repo_for(cfg["model"]["name"]),
         language=lang,
         initial_prompt=_initial_prompt(cfg.get("glossary")),
