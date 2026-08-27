@@ -1,4 +1,4 @@
-# Guida rapida — uso senza terminale
+# Sbobiner — guida rapida (uso senza terminale)
 
 ## Cosa c'è da scaricare
 
@@ -7,6 +7,8 @@
 ```
 ~/Documents/trascrizione-offline
 ```
+
+(la cartella locale si chiama ancora `trascrizione-offline`; il progetto è **Sbobiner**)
 
 Anche i modelli (Whisper + riconoscimento voci, ~1,5 GB) sono già scaricati.
 Da qui in poi funziona **offline**.

@@ -1,4 +1,4 @@
-# Trascrizione offline
+# Sbobiner
 
 Pipeline di trascrizione per **lezioni e riunioni**, costruita sopra Whisper.
 Gira interamente **offline** dopo il setup iniziale. Nessun account, nessun token.

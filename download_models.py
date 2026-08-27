@@ -30,7 +30,7 @@ def _download(url, dst):
         print(f"  gia' presente: {dst.name}")
         return
     print(f"  scarico: {url.split('/')[-1]}")
-    req = urllib.request.Request(url, headers={"User-Agent": "trascrizione-offline"})
+    req = urllib.request.Request(url, headers={"User-Agent": "sbobiner"})
     with urllib.request.urlopen(req, context=_SSL) as r, open(dst, "wb") as f:
         shutil.copyfileobj(r, f)
 

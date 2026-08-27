@@ -108,5 +108,5 @@ def download(job_id, fmt):
 if __name__ == "__main__":
     url = "http://127.0.0.1:5000"
     threading.Timer(1.0, lambda: webbrowser.open(url)).start()
-    print(f"\n  Trascrizione offline attiva:  {url}\n  (chiudi questa finestra per fermare)\n")
+    print(f"\n  Sbobiner attivo:  {url}\n  (chiudi questa finestra per fermare)\n")
     app.run(host="127.0.0.1", port=5000, use_reloader=False)
