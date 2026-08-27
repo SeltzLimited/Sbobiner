@@ -7,6 +7,8 @@
 > Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro). Scarichi la trascrizione. Fine.
 > N.B.: Non puoi trascrivere un concerto.
 
+PER ORA SOLO MAC APPLE SILICON
+
 Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
 Gira interamente **offline** dopo il setup iniziale. Nessun account, nessun token.
 
