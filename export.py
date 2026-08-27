@@ -1,7 +1,10 @@
-"""Esportazione: testo semplice, sottotitoli SRT/VTT, Word DOCX formattato."""
-from docx import Document
+"""Esportazione: testo semplice, sottotitoli SRT/VTT, Word DOCX formattato.
 
-import merge
+La trascrizione (TXT, DOCX) e' testo continuo per turno di parola, gia' raggruppato
+da postprocess.run: intestazione (speaker + tempo) solo a ogni cambio speaker.
+SRT/VTT restano granulari per riga, perche' i sottotitoli hanno bisogno dei tempi.
+"""
+from docx import Document
 
 
 def _hms(sec, sep=":", ms=False):
@@ -20,8 +23,10 @@ def to_txt(result):
     lines = []
     for sec in result["sections"]:
         lines.append(f"\n== Sezione {sec['index']} ({_hms(sec['start'])}) ==")
-        for seg in sec["segments"]:
-            lines.append(f"[{_hms(seg['start'])}] {_spk(seg)}{seg['text']}")
+        for turn in sec["turns"]:
+            if turn["speaker"]:
+                lines.append(f"\n{turn['speaker']} [{_hms(turn['start'])}]")
+            lines.extend(turn["paras"])
     return "\n".join(lines).strip() + "\n"
 
 
@@ -61,7 +66,7 @@ def to_docx(result, path, source_name="", mode="lezione"):
     doc.add_heading("Trascrizione", level=1)
     for sec in result["sections"]:
         doc.add_heading(f"Sezione {sec['index']}  ({_hms(sec['start'])})", level=2)
-        for turn in merge.group_turns(sec["segments"]):
+        for turn in sec["turns"]:
             # intestazione (speaker + timestamp) solo a ogni cambio di speaker
             if turn["speaker"]:
                 head = doc.add_paragraph()

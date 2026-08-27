@@ -44,6 +44,9 @@ diarization:
 postprocess:
   # Intercalari rimossi dalla trascrizione pulita.
   fillers: ["ehm", "ehmm", "cioe'", "cioè", "diciamo", "tipo", "praticamente", "no?"]
+  # Dentro un turno di parola, una pausa piu' lunga di questi secondi apre un
+  # nuovo paragrafo nel testo (TXT/DOCX). Piu' basso = paragrafi piu' corti.
+  paragraph_gap_seconds: 1.0
   # Nuova sezione se il silenzio tra due frasi supera questi secondi...
   section_gap_seconds: 4.0
   # ...oppure se una frase inizia con / contiene una di queste espressioni.

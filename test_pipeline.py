@@ -66,6 +66,7 @@ def test_sections_split_on_gap_and_keyword():
     ]
     r = postprocess.run(segs, CFG)
     assert len(r["sections"]) == 3
+    assert all("turns" in sec and "segments" not in sec for sec in r["sections"])
 
 
 def test_action_items_and_decisions():

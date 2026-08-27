@@ -6,6 +6,8 @@ upgrade e' un singolo passaggio LLM locale (es. mlx-lm) su queste due funzioni.
 """
 import re
 
+import merge
+
 
 def _apply_corrections(text, corrections):
     for wrong, right in (corrections or {}).items():
@@ -65,10 +67,17 @@ def run(segments, cfg, language="it", mode="lezione"):
     # action item / decisioni sono un concetto da riunione: in "lezione" i trigger
     # ("dobbiamo", "bisogna") sono quasi sempre falsi positivi retorici.
     meeting = mode == "riunione"
+    sections = _split_sections(segments, pp["section_gap_seconds"], pp["section_keywords"])
+    # la trascrizione e' testo continuo per turno di parola: i segmenti brevi di
+    # Whisper vengono uniti, l'intestazione (speaker + tempo) cambia solo a cambio speaker.
+    para_gap = pp.get("paragraph_gap_seconds", 1.0)
+    for sec in sections:
+        sec["turns"] = merge.group_turns(sec.pop("segments"), para_gap)
+
     return {
         "language": language,
-        "segments": segments,
-        "sections": _split_sections(segments, pp["section_gap_seconds"], pp["section_keywords"]),
+        "segments": segments,  # granulari e con i tempi: servono a SRT/VTT
+        "sections": sections,
         "action_items": _extract(segments, pp["actionitem_triggers"]) if meeting else [],
         "decisions": _extract(segments, pp["decision_triggers"]) if meeting else [],
     }
