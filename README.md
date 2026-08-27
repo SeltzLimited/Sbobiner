@@ -4,7 +4,7 @@
 > Questo non sarà perfetto, ma fa il suo. E il file resta sul tuo pc.
 > Fatto per MAC perché è quello che uso al momento. Liberi di contribuire.
 >
-> Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro, ci vuole un po'). Scarichi la trascrizione. Fine.
+> Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro). Scarichi la trascrizione. Fine.
 > N.B.: Non puoi trascrivere un concerto.
 
 Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
@@ -15,9 +15,7 @@ Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (modelli lib
 
 ---
 
-**Guida per chi non usa il terminale:** [`GUIDA.md`](GUIDA.md).
-
-## Setup iniziale (una volta sola, serve internet)
+## Setup iniziale (solo la prima volta, serve internet)
 
 Doppio click su **`setup.command`**.
 
@@ -48,9 +46,8 @@ Tutto si può regolare da lì, senza toccare il codice.
 language: it        # italiano (default)
 ```
 
-- Un'altra lingua: metti il codice ISO 639-1 (`en`, `fr`, `de`, `es`, `pt`, ...).
+- Cambio lingua tramite codice ISO 639-1 (`en`, `fr`, `de`, `es`, `pt`, ...).
 - `auto`: Whisper rileva la lingua da solo (più lento, meno preciso).
-- Si può anche scegliere dal menu **Lingua** nella pagina web, senza modificare il file.
 
 ### Modello Whisper
 
@@ -126,7 +123,7 @@ i cambi di sezione, frasi-chiave per sezioni / action item / decisioni. Tutte mo
 
 ## Note
 
-- Velocità misurata su Mac 8 GB con `large-v3-turbo-q4`: ~12× il tempo reale
+- Velocità misurata su Mac 8 GB con `large-v3-turbo-q4`
   (38 min di audio → ~3,5 min di trascrizione). Senza diarization.
 - Tutto resta in locale, nella cartella `work/`. Contiene anche il
   `.wav` intermedio (~2 MB/min): svuotala quando vuoi.
