@@ -1,0 +1,73 @@
+# Configurazione pipeline. Modifica qui, nessun codice da toccare.
+
+# Lingua dell'audio. Codice ISO 639-1 ("it", "en", "fr", "de", "es", ...).
+# Metti "auto" per far rilevare la lingua a Whisper (piu' lento, meno preciso).
+# Si puo' anche cambiare al volo dal menu a tendina nella pagina web.
+language: it
+
+model:
+  # small | medium | large-v3-turbo | large-v3-turbo-q4 | large-v3
+  # Mac 8GB RAM: "large-v3-turbo" e' il default consigliato.
+  #   - se noti rallentamenti o swap: passa a "large-v3-turbo-q4" (~450MB, poco meno preciso)
+  #   - se ancora lento: "medium", poi "small"
+  #   - se hai 16GB+ e vuoi il massimo: "large-v3"
+  name: large-v3-turbo
+
+# Termini iniettati come bias nella trascrizione (nomi propri, sigle, gergo).
+# Riduce gli errori su terminologia specifica. Max ~200 parole totali: oltre, i primi vincono.
+glossary:
+  - Kubernetes
+  - PostgreSQL
+  - middleware
+
+# Correzione post-trascrizione esatta: "come lo sbaglia" -> "come deve essere".
+corrections:
+  "cuber netes": Kubernetes
+  "post gres": PostgreSQL
+
+diarization:
+  # Preset attivo. Sovrascrivibile dalla pagina web.
+  preset: riunione
+  # num_speakers: se sai quanti parlano, mettilo (es. 3) per una diarization piu' stabile.
+  #               Lascia null per stima automatica via soglia.
+  aula:
+    num_speakers: null
+    cluster_threshold: 0.70
+  riunione:
+    num_speakers: null
+    cluster_threshold: 0.50
+
+postprocess:
+  # Intercalari rimossi dalla trascrizione pulita.
+  fillers: ["ehm", "ehmm", "cioe'", "cioè", "diciamo", "tipo", "praticamente", "no?"]
+  # Nuova sezione se il silenzio tra due frasi supera questi secondi...
+  section_gap_seconds: 4.0
+  # ...oppure se una frase inizia con / contiene una di queste espressioni.
+  section_keywords:
+    - "passiamo a"
+    - "prossimo argomento"
+    - "cambiamo argomento"
+    - "andiamo avanti con"
+    - "in conclusione"
+    - "per riassumere"
+  # Una frase che contiene uno di questi diventa un action item.
+  actionitem_triggers:
+    - "dobbiamo"
+    - "bisogna"
+    - "entro il"
+    - "entro la"
+    - "si occupa"
+    - "ti occupi"
+    - "mi occupo"
+    - "action item"
+    - "todo"
+    - "scadenza"
+    - "deadline"
+  # Una frase che contiene uno di questi diventa una decisione.
+  decision_triggers:
+    - "abbiamo deciso"
+    - "si e' deciso"
+    - "si è deciso"
+    - "deciso di"
+    - "concordiamo"
+    - "siamo d'accordo"

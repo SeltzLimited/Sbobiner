@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trascrizione offline</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 640px; margin: 2rem auto;
+         padding: 0 1rem; line-height: 1.5; }
+  h1 { font-size: 1.4rem; }
+  #drop { border: 2px dashed #888; border-radius: 12px; padding: 2.5rem 1rem; text-align: center;
+          cursor: pointer; transition: background .15s, border-color .15s; }
+  #drop.over { border-color: #0a84ff; background: rgba(10,132,255,.08); }
+  #drop.has-file { border-style: solid; }
+  .row { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+  .row label { display: flex; flex-direction: column; font-size: .85rem; gap: .25rem; }
+  select, input[type=number] { padding: .35rem; font-size: .9rem; }
+  button { font-size: 1rem; padding: .6rem 1.4rem; border-radius: 8px; border: 0;
+           background: #0a84ff; color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  #progress { margin-top: 1.5rem; font-weight: 600; }
+  #downloads a { display: inline-block; margin: .3rem .6rem .3rem 0; padding: .5rem 1rem;
+                 border: 1px solid #0a84ff; border-radius: 8px; text-decoration: none; }
+  .err { color: #d70015; white-space: pre-wrap; font-size: .8rem; }
+  .spin { display: inline-block; width: 1em; height: 1em; border: 2px solid #888;
+          border-top-color: transparent; border-radius: 50%; animation: r 1s linear infinite;
+          vertical-align: -2px; }
+  @keyframes r { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<h1>Trascrizione offline</h1>
+
+<div id="drop">Trascina qui il file audio o video<br><small>mp3, wav, m4a, aac, ogg, mp4, mkv…</small>
+  <input type="file" id="file" hidden accept="audio/*,video/*">
+</div>
+
+<div class="row">
+  <label>Lingua
+    <select id="language">
+      {% for code, name in languages %}
+      <option value="{{ code }}" {{ 'selected' if code == default_language else '' }}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Tipo
+    <select id="mode">
+      <option value="lezione">Lezione</option>
+      <option value="riunione">Riunione</option>
+    </select>
+  </label>
+  <label>Riconosci chi parla
+    <select id="diarize">
+      <option value="on" selected>Sì</option>
+      <option value="off">No</option>
+    </select>
+  </label>
+  <label>Contesto
+    <select id="preset">
+      <option value="aula" {{ 'selected' if default_preset == 'aula' else '' }}>Aula (molte persone)</option>
+      <option value="riunione" {{ 'selected' if default_preset == 'riunione' else '' }}>Riunione (poche)</option>
+    </select>
+  </label>
+  <label>N. persone (opz.)
+    <input type="number" id="num_speakers" min="1" max="30" placeholder="auto">
+  </label>
+</div>
+
+<button id="go" disabled>Trascrivi</button>
+
+<div id="progress"></div>
+<div id="downloads"></div>
+<div id="err" class="err"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const drop = $("#drop"), fileInput = $("#file"), go = $("#go");
+let file = null;
+
+drop.onclick = () => fileInput.click();
+fileInput.onchange = () => setFile(fileInput.files[0]);
+["dragover", "dragenter"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(e => drop.addEventListener(e, () => drop.classList.remove("over")));
+drop.addEventListener("drop", ev => { ev.preventDefault(); setFile(ev.dataTransfer.files[0]); });
+
+function setFile(f) {
+  if (!f) return;
+  file = f;
+  drop.textContent = f.name;
+  drop.classList.add("has-file");
+  go.disabled = false;
+}
+
+go.onclick = async () => {
+  go.disabled = true;
+  $("#downloads").innerHTML = "";
+  $("#err").textContent = "";
+  const fd = new FormData();
+  fd.append("audio", file);
+  for (const id of ["language", "mode", "preset", "num_speakers"]) fd.append(id, $("#" + id).value);
+  fd.append("diarize", $("#diarize").value);
+
+  $("#progress").innerHTML = '<span class="spin"></span> Invio…';
+  const r = await fetch("/transcribe", { method: "POST", body: fd });
+  const { job_id } = await r.json();
+  poll(job_id);
+};
+
+async function poll(id) {
+  const r = await fetch("/status/" + id);
+  const s = await r.json();
+  if (s.state === "running") {
+    $("#progress").innerHTML = '<span class="spin"></span> ' + s.stage + "…";
+    setTimeout(() => poll(id), 2000);
+  } else if (s.state === "done") {
+    $("#progress").textContent = "Fatto.";
+    $("#downloads").innerHTML = ["txt", "srt", "vtt", "docx"]
+      .map(f => `<a href="/download/${id}.${f}">Scarica .${f}</a>`).join("");
+    go.disabled = false;
+  } else {
+    $("#progress").textContent = "Errore.";
+    $("#err").textContent = s.error || "errore sconosciuto";
+    go.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

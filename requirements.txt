@@ -1,0 +1,8 @@
+mlx-whisper
+sherpa-onnx
+flask
+python-docx
+imageio-ffmpeg
+pyyaml
+numpy
+huggingface_hub
