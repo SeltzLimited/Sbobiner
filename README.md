@@ -4,7 +4,7 @@
 > Questo non sarà perfetto, ma fa il suo. E il file resta sul tuo pc.
 > Fatto per MAC perché è quello che uso al momento. Liberi di contribuire.
 >
-> Installi una sola volta. Carichi il file. Trascrivi. Scarichi la trascrizione. Fine.
+> Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro, ci vuole un po'). Scarichi la trascrizione. Fine.
 > N.B.: Non puoi trascrivere un concerto.
 
 Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
