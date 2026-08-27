@@ -16,14 +16,18 @@ model:
 # Termini iniettati come bias nella trascrizione (nomi propri, sigle, gergo).
 # Riduce gli errori su terminologia specifica. Max ~200 parole totali: oltre, i primi vincono.
 glossary:
-  - Kubernetes
-  - PostgreSQL
-  - middleware
+  - ATU
+  - ROS
+  - VHF
+  - UHF
 
 # Correzione post-trascrizione esatta: "come lo sbaglia" -> "come deve essere".
+# (regex word-boundary, case-insensitive)
 corrections:
-  "cuber netes": Kubernetes
-  "post gres": PostgreSQL
+  "l'atru": "l'ATU"
+  "l'atum": "l'ATU"
+  "atru": "ATU"
+  "atum": "ATU"
 
 diarization:
   # Preset attivo. Sovrascrivibile dalla pagina web.

@@ -125,6 +125,6 @@ fine-tuning LoRA leggero di Whisper; si aggiunge come script separato senza tocc
 
 ## Note
 
-- Prima esecuzione della trascrizione su 8 GB: un'ora di lezione può richiedere
-  ~30–60 min. È batch, si può lasciar girare.
+- Velocità misurata su Mac 8 GB con `large-v3-turbo`: ~12× il tempo reale
+  (38 min di audio → ~3 min di trascrizione). Senza diarization.
 - Tutto resta in locale, nella cartella `work/` (ignorata da git). Svuotala quando vuoi.

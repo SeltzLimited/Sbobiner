@@ -67,9 +67,6 @@ def to_docx(result, path, source_name="", mode="lezione"):
             p.add_run(f"[{_hms(seg['start'])}] ").font.size = Pt(8)
             p.add_run(seg["text"])
 
-    if mode == "lezione" and (result["decisions"] or result["action_items"]):
-        _decisions_actions(doc, result)
-
     doc.save(str(path))
     return path
 

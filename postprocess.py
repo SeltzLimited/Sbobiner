@@ -7,6 +7,12 @@ upgrade e' un singolo passaggio LLM locale (es. mlx-lm) su queste due funzioni.
 import re
 
 
+def _apply_corrections(text, corrections):
+    for wrong, right in (corrections or {}).items():
+        text = re.sub(rf"\b{re.escape(wrong)}\b", right, text, flags=re.IGNORECASE)
+    return text
+
+
 def _clean_fillers(text, fillers):
     if not fillers:
         return text
@@ -49,16 +55,20 @@ def _extract(segments, triggers):
     return hits
 
 
-def run(segments, cfg, language="it"):
+def run(segments, cfg, language="it", mode="lezione"):
     pp = cfg["postprocess"]
+    corrections = cfg.get("corrections")
     for s in segments:
-        s["text"] = _clean_fillers(s["text"], pp["fillers"])
+        s["text"] = _clean_fillers(_apply_corrections(s["text"], corrections), pp["fillers"])
     segments = [s for s in segments if s["text"]]
 
+    # action item / decisioni sono un concetto da riunione: in "lezione" i trigger
+    # ("dobbiamo", "bisogna") sono quasi sempre falsi positivi retorici.
+    meeting = mode == "riunione"
     return {
         "language": language,
         "segments": segments,
         "sections": _split_sections(segments, pp["section_gap_seconds"], pp["section_keywords"]),
-        "action_items": _extract(segments, pp["actionitem_triggers"]),
-        "decisions": _extract(segments, pp["decision_triggers"]),
+        "action_items": _extract(segments, pp["actionitem_triggers"]) if meeting else [],
+        "decisions": _extract(segments, pp["decision_triggers"]) if meeting else [],
     }

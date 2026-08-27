@@ -54,9 +54,10 @@ def test_action_items_and_decisions():
         {"start": 3.0, "end": 4.0, "text": "abbiamo deciso di rimandare", "speaker": "Speaker 2"},
         {"start": 5.0, "end": 6.0, "text": "bel tempo oggi", "speaker": "Speaker 1"},
     ]
-    r = postprocess.run(segs, CFG)
+    r = postprocess.run(segs, CFG, mode="riunione")
     assert len(r["action_items"]) == 1 and r["action_items"][0]["speaker"] == "Speaker 1"
     assert len(r["decisions"]) == 1 and r["decisions"][0]["speaker"] == "Speaker 2"
+    assert postprocess.run(segs, CFG, mode="lezione")["action_items"] == []
 
 
 if __name__ == "__main__":

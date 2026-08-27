@@ -47,7 +47,7 @@ def _pipeline(job_id, src, opts):
 
         j["stage"] = "Post-elaborazione"
         lang = opts["language"] if opts["language"] != "auto" else CFG.get("language", "it")
-        j["result"] = postprocess.run(segments, CFG, language=lang)
+        j["result"] = postprocess.run(segments, CFG, language=lang, mode=opts["mode"])
         j["mode"] = opts["mode"]
         j["state"] = "done"
         j["stage"] = "Completato"
