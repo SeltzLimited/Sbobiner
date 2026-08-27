@@ -5,10 +5,8 @@
 **Niente.** Il programma è già sul tuo Mac, nella cartella:
 
 ```
-~/Documents/trascrizione-offline
+~/Documents/Sbobiner
 ```
-
-(la cartella locale si chiama ancora `trascrizione-offline`; il progetto è **Sbobiner**)
 
 Anche i modelli (Whisper + riconoscimento voci, ~1,5 GB) sono già scaricati.
 Da qui in poi funziona **offline**.
@@ -20,7 +18,7 @@ su quel Mac (i modelli si riscaricano).
 
 ## Installazione (una volta sola)
 
-1. Apri la cartella `trascrizione-offline` nel Finder.
+1. Apri la cartella `Sbobiner` nel Finder.
 2. Doppio click su **`setup.command`**.
 3. Si apre una finestra nera (Terminale): parte da sola, aspetta che scriva
    **"Puoi chiudere questa finestra"**, poi premi Invio e chiudila.
