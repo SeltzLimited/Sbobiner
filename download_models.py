@@ -1,12 +1,18 @@
 """Scarica una volta i modelli (Whisper + diarization) nella cartella models/.
 Dopo questo, il sistema gira completamente offline.
 """
+import shutil
+import ssl
 import sys
 import tarfile
 import urllib.request
 from pathlib import Path
 
+import certifi
 import yaml
+
+# Python di python.org non usa i certificati di sistema: prendiamo la CA bundle da certifi.
+_SSL = ssl.create_default_context(cafile=certifi.where())
 
 ROOT = Path(__file__).parent
 MODELS = ROOT / "models"
@@ -14,8 +20,9 @@ MODELS.mkdir(exist_ok=True)
 
 SEG_URL = ("https://github.com/k2-fsa/sherpa-onnx/releases/download/"
            "speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2")
+# NB: il tag della release upstream contiene un refuso ("recongition"), non correggerlo.
 EMB_URL = ("https://github.com/k2-fsa/sherpa-onnx/releases/download/"
-           "speaker-recognition-models/wespeaker_en_voxceleb_CAM++.onnx")
+           "speaker-recongition-models/wespeaker_en_voxceleb_CAM++.onnx")
 
 
 def _download(url, dst):
@@ -23,7 +30,9 @@ def _download(url, dst):
         print(f"  gia' presente: {dst.name}")
         return
     print(f"  scarico: {url.split('/')[-1]}")
-    urllib.request.urlretrieve(url, dst)
+    req = urllib.request.Request(url, headers={"User-Agent": "trascrizione-offline"})
+    with urllib.request.urlopen(req, context=_SSL) as r, open(dst, "wb") as f:
+        shutil.copyfileobj(r, f)
 
 
 def diarization_models():
@@ -31,7 +40,7 @@ def diarization_models():
     if not (MODELS / "sherpa-onnx-pyannote-segmentation-3-0" / "model.onnx").exists():
         _download(SEG_URL, tar)
         with tarfile.open(tar, "r:bz2") as t:
-            t.extractall(MODELS)
+            t.extractall(MODELS, filter="data")
         tar.unlink()
     _download(EMB_URL, MODELS / "wespeaker_en_voxceleb_CAM++.onnx")
 

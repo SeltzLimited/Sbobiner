@@ -6,3 +6,4 @@ imageio-ffmpeg
 pyyaml
 numpy
 huggingface_hub
+certifi
