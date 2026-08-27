@@ -152,6 +152,10 @@ Componenti di terze parti: [`mlx-whisper`](https://github.com/ml-explore/mlx-exa
 (BSD-3) · [python-docx](https://github.com/python-openxml/python-docx) (MIT).
 I pesi dei modelli scaricati da `download_models.py` hanno licenze proprie dei rispettivi autori.
 
+## Changelog
+
+Vedi [CHANGELOG.md](CHANGELOG.md).
+
 ## Licenza
 
 [MIT](LICENSE).

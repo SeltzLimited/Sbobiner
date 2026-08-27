@@ -26,3 +26,9 @@ def load_wav(path):
         assert w.getframerate() == SAMPLE_RATE and w.getnchannels() == 1, "atteso wav 16kHz mono"
         raw = w.readframes(w.getnframes())
     return np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+
+
+def duration(path):
+    """Secondi di un wav, senza caricarlo in memoria."""
+    with wave.open(str(path), "rb") as w:
+        return w.getnframes() / w.getframerate()

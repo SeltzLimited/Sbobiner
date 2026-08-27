@@ -38,14 +38,14 @@ def _download(url, dst):
 def diarization_models():
     seg_dir = MODELS / "sherpa-onnx-pyannote-segmentation-3-0"
     tar = MODELS / "seg.tar.bz2"
-    if not (seg_dir / "model.onnx").exists():
+    if not (seg_dir / "model.int8.onnx").exists():
         _download(SEG_URL, tar)
         with tarfile.open(tar, "r:bz2") as t:
             t.extractall(MODELS, filter="data")
         tar.unlink()
-        # del tarball teniamo solo il modello che usiamo: via script, licenze, vad, int8
+        # del tarball teniamo solo il modello che usiamo: via script, licenze, vad, fp32
         for f in seg_dir.iterdir():
-            if f.name != "model.onnx":
+            if f.name != "model.int8.onnx":
                 f.unlink()
     _download(EMB_URL, MODELS / "wespeaker_en_voxceleb_CAM++.onnx")
 

@@ -5,77 +5,151 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sbobiner</title>
 <style>
-  :root { color-scheme: light dark; }
-  body { font-family: -apple-system, system-ui, sans-serif; max-width: 640px; margin: 2rem auto;
-         padding: 0 1rem; line-height: 1.5; }
-  h1 { font-size: 1.4rem; }
-  #drop { border: 2px dashed #888; border-radius: 12px; padding: 2.5rem 1rem; text-align: center;
-          cursor: pointer; transition: background .15s, border-color .15s; }
-  #drop.over { border-color: #0a84ff; background: rgba(10,132,255,.08); }
-  #drop.has-file { border-style: solid; }
-  .row { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
-  .row label { display: flex; flex-direction: column; font-size: .85rem; gap: .25rem; }
-  select, input[type=number] { padding: .35rem; font-size: .9rem; }
-  button { font-size: 1rem; padding: .6rem 1.4rem; border-radius: 8px; border: 0;
-           background: #0a84ff; color: #fff; cursor: pointer; }
-  button:disabled { opacity: .5; cursor: default; }
-  #progress { margin-top: 1.5rem; font-weight: 600; }
-  #downloads a { display: inline-block; margin: .3rem .6rem .3rem 0; padding: .5rem 1rem;
-                 border: 1px solid #0a84ff; border-radius: 8px; text-decoration: none; }
-  .err { color: #d70015; white-space: pre-wrap; font-size: .8rem; }
-  .spin { display: inline-block; width: 1em; height: 1em; border: 2px solid #888;
-          border-top-color: transparent; border-radius: 50%; animation: r 1s linear infinite;
-          vertical-align: -2px; }
-  @keyframes r { to { transform: rotate(360deg); } }
+  :root {
+    --bg: #fbf1e1; --fg: #2b1710; --muted: #977c5e; --line: #e6d3ad;
+    --card: #f5e7c8; --accent: #f5921e; --accent-fg: #2b1710;
+    --err: #c62a2a; --radius: 18px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #221a13; --fg: #fbf1e1; --muted: #b39a7c; --line: #48382a;
+      --card: #32271e; --accent: #f9992e; --accent-fg: #221a13;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: ui-rounded, "SF Pro Rounded", -apple-system, system-ui, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--fg); line-height: 1.5;
+    margin: 0; padding: 2.5rem 1rem 4rem; display: flex; justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 560px; }
+
+  header { text-align: center; margin-bottom: 1.5rem; }
+  #logo { width: 100%; max-width: 440px; height: auto; margin: 0 auto; display: block; }
+  h1.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  #drop {
+    border: 2.5px dashed var(--line); border-radius: var(--radius); background: var(--card);
+    padding: 2.5rem 1rem; text-align: center; cursor: pointer; color: var(--muted);
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  #drop small { display: block; margin-top: .4rem; font-size: .8rem; }
+  #drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--card)); }
+  #drop.has-file { border-style: solid; border-color: var(--accent); color: var(--fg); font-weight: 700; }
+
+  .row { display: flex; flex-wrap: wrap; gap: .9rem; justify-content: center; margin: 1.4rem 0; }
+  .row label { display: flex; flex-direction: column; font-size: .8rem; gap: .3rem; color: var(--muted); }
+  select, input[type=number] {
+    padding: .4rem .5rem; font-size: .9rem; border: 1px solid var(--line);
+    border-radius: 8px; background: var(--bg); color: var(--fg);
+  }
+  input[type=number] { width: 6.5rem; }
+
+  .toggle { display: flex; align-items: center; gap: .55rem; justify-content: center;
+            margin: 1.1rem 0 .4rem; font-size: .9rem; cursor: pointer; }
+  .toggle input { width: 1.15rem; height: 1.15rem; accent-color: var(--accent); cursor: pointer; }
+  .toggle em { color: var(--muted); font-style: normal; }
+  #diar-opts { display: none; margin-top: .4rem; }
+  #diar-opts.show { display: flex; }
+
+  #go {
+    display: block; margin: 0 auto; font-size: 1.05rem; font-weight: 700;
+    padding: .75rem 2.4rem; border-radius: 999px; border: 2px solid var(--fg);
+    background: var(--accent); color: var(--accent-fg); cursor: pointer;
+    transition: transform .1s, filter .15s;
+  }
+  #go:hover:not(:disabled) { filter: brightness(1.05); }
+  #go:active:not(:disabled) { transform: translateY(1px); }
+  #go:disabled { opacity: .4; cursor: default; }
+
+  #panel { margin-top: 2rem; display: none; }
+  #panel.show { display: block; }
+  .barhead { display: flex; justify-content: space-between; font-size: .85rem;
+             font-weight: 600; margin-bottom: .5rem; }
+  #pct { color: var(--muted); }
+  progress {
+    width: 100%; height: 10px; border: 0; border-radius: 999px;
+    background: var(--line); appearance: none; -webkit-appearance: none; display: block;
+  }
+  progress::-webkit-progress-bar { background: var(--line); border-radius: 999px; }
+  progress::-webkit-progress-value { background: var(--accent); border-radius: 999px; transition: width .4s ease; }
+  progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+  progress.indet { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .45; } }
+
+  #downloads { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-top: 1.4rem; }
+  #downloads a {
+    padding: .55rem 1.2rem; border: 2px solid var(--accent); border-radius: 999px;
+    text-decoration: none; color: var(--fg); font-weight: 700; font-size: .9rem;
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+  #downloads a:hover { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+  #err { color: var(--err); white-space: pre-wrap; font-size: .78rem; margin-top: 1rem;
+         font-family: ui-monospace, monospace; }
 </style>
 </head>
 <body>
-<h1>Sbobiner</h1>
+<div class="wrap">
 
-<div id="drop">Trascina qui il file audio o video<br><small>mp3, wav, m4a, aac, ogg, mp4, mkv…</small>
-  <input type="file" id="file" hidden accept="audio/*,video/*">
+  <header>
+    <h1 class="sr">Sbobiner — trascrizione audio in locale</h1>
+    <img id="logo" src="/static/SBOBINER_BIG.png" alt="Sbobiner — sbobina tutto, si stanca lui"
+         onerror="this.style.display='none'">
+  </header>
+
+  <div id="drop">Trascina qui il file audio o video
+    <small>mp3, wav, m4a, aac, ogg, mp4, mkv…</small>
+    <input type="file" id="file" hidden accept="audio/*,video/*">
+  </div>
+
+  <div class="row">
+    <label>Lingua
+      <select id="language">
+        {% for code, name in languages %}
+        <option value="{{ code }}" {{ 'selected' if code == default_language else '' }}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Tipo
+      <select id="mode">
+        <option value="lezione">Lezione</option>
+        <option value="riunione">Riunione</option>
+      </select>
+    </label>
+  </div>
+
+  <label class="toggle">
+    <input type="checkbox" id="diarize">
+    <span>Riconosci chi parla <em>— più lento, utile solo con più voci</em></span>
+  </label>
+
+  <div class="row" id="diar-opts">
+    <label>Contesto
+      <select id="preset">
+        <option value="aula" {{ 'selected' if default_preset == 'aula' else '' }}>Aula (molte persone)</option>
+        <option value="riunione" {{ 'selected' if default_preset == 'riunione' else '' }}>Riunione (poche)</option>
+      </select>
+    </label>
+    <label>N. persone (opz.)
+      <input type="number" id="num_speakers" min="1" max="30" placeholder="auto">
+    </label>
+  </div>
+
+  <button id="go" disabled>Trascrivi</button>
+
+  <div id="panel">
+    <div class="barhead"><span id="stage">In coda…</span><span id="pct"></span></div>
+    <progress id="bar" max="100" value="0"></progress>
+    <div id="downloads"></div>
+    <div id="err"></div>
+  </div>
+
 </div>
-
-<div class="row">
-  <label>Lingua
-    <select id="language">
-      {% for code, name in languages %}
-      <option value="{{ code }}" {{ 'selected' if code == default_language else '' }}>{{ name }}</option>
-      {% endfor %}
-    </select>
-  </label>
-  <label>Tipo
-    <select id="mode">
-      <option value="lezione">Lezione</option>
-      <option value="riunione">Riunione</option>
-    </select>
-  </label>
-  <label>Riconosci chi parla
-    <select id="diarize">
-      <option value="on" selected>Sì</option>
-      <option value="off">No</option>
-    </select>
-  </label>
-  <label>Contesto
-    <select id="preset">
-      <option value="aula" {{ 'selected' if default_preset == 'aula' else '' }}>Aula (molte persone)</option>
-      <option value="riunione" {{ 'selected' if default_preset == 'riunione' else '' }}>Riunione (poche)</option>
-    </select>
-  </label>
-  <label>N. persone (opz.)
-    <input type="number" id="num_speakers" min="1" max="30" placeholder="auto">
-  </label>
-</div>
-
-<button id="go" disabled>Trascrivi</button>
-
-<div id="progress"></div>
-<div id="downloads"></div>
-<div id="err" class="err"></div>
 
 <script>
 const $ = s => document.querySelector(s);
 const drop = $("#drop"), fileInput = $("#file"), go = $("#go");
+const panel = $("#panel"), bar = $("#bar"), stage = $("#stage"), pct = $("#pct");
 let file = null;
 
 drop.onclick = () => fileInput.click();
@@ -83,6 +157,9 @@ fileInput.onchange = () => setFile(fileInput.files[0]);
 ["dragover", "dragenter"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add("over"); }));
 ["dragleave", "drop"].forEach(e => drop.addEventListener(e, () => drop.classList.remove("over")));
 drop.addEventListener("drop", ev => { ev.preventDefault(); setFile(ev.dataTransfer.files[0]); });
+
+const diarize = $("#diarize");
+diarize.addEventListener("change", () => $("#diar-opts").classList.toggle("show", diarize.checked));
 
 function setFile(f) {
   if (!f) return;
@@ -94,32 +171,44 @@ function setFile(f) {
 
 go.onclick = async () => {
   go.disabled = true;
+  panel.classList.add("show");
   $("#downloads").innerHTML = "";
   $("#err").textContent = "";
+  setBar(0, "Invio del file…", true);
+
   const fd = new FormData();
   fd.append("audio", file);
   for (const id of ["language", "mode", "preset", "num_speakers"]) fd.append(id, $("#" + id).value);
-  fd.append("diarize", $("#diarize").value);
+  fd.append("diarize", diarize.checked ? "on" : "off");
 
-  $("#progress").innerHTML = '<span class="spin"></span> Invio…';
   const r = await fetch("/transcribe", { method: "POST", body: fd });
   const { job_id } = await r.json();
   poll(job_id);
 };
 
+function setBar(value, text, indeterminate) {
+  stage.textContent = text;
+  bar.classList.toggle("indet", !!indeterminate);
+  if (indeterminate) { bar.removeAttribute("value"); pct.textContent = ""; }
+  else { bar.value = value; pct.textContent = Math.round(value) + "%"; }
+}
+
 async function poll(id) {
-  const r = await fetch("/status/" + id);
-  const s = await r.json();
+  let s;
+  try { s = await (await fetch("/status/" + id)).json(); }
+  catch (e) { setTimeout(() => poll(id), 1500); return; }
+
   if (s.state === "running") {
-    $("#progress").innerHTML = '<span class="spin"></span> ' + s.stage + "…";
-    setTimeout(() => poll(id), 2000);
+    setBar(s.progress || 0, s.stage + "…", !s.progress);
+    setTimeout(() => poll(id), 1000);
   } else if (s.state === "done") {
-    $("#progress").textContent = "Fatto.";
+    setBar(100, "Completato", false);
     $("#downloads").innerHTML = ["txt", "srt", "vtt", "docx"]
       .map(f => `<a href="/download/${id}.${f}">Scarica .${f}</a>`).join("");
     go.disabled = false;
   } else {
-    $("#progress").textContent = "Errore.";
+    setBar(0, "Errore", false);
+    bar.classList.remove("indet");
     $("#err").textContent = s.error || "errore sconosciuto";
     go.disabled = false;
   }

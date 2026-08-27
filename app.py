@@ -3,6 +3,7 @@
 Uso quotidiano: doppio click su start.command. Tutto offline.
 """
 import threading
+import time
 import traceback
 import uuid
 from pathlib import Path
@@ -30,27 +31,55 @@ LANGUAGES = [("it", "Italiano"), ("auto", "Rileva automaticamente"), ("en", "Ing
              ("fr", "Francese"), ("de", "Tedesco"), ("es", "Spagnolo")]
 
 
+def _ramp(j, lo, hi, est_seconds, stop):
+    """Fa avanzare la barra durante una fase senza callback (la trascrizione),
+    in base a una stima di durata. Si ferma quando `stop` viene settato."""
+    t0 = time.time()
+    while not stop.wait(0.7):
+        frac = min(0.97, (time.time() - t0) / max(est_seconds, 1))
+        j["progress"] = int(lo + (hi - lo) * frac)
+
+
 def _pipeline(job_id, src, opts):
     j = jobs[job_id]
+
+    def stage(text, pct):
+        j["stage"], j["progress"] = text, int(pct)
+
     try:
         wav = WORK / f"{job_id}.wav"
-        j["stage"] = "Normalizzazione audio"
+        stage("Preparazione dell'audio", 1)
         audio.normalize(src, wav)
+        secs = audio.duration(wav)
 
-        j["stage"] = "Trascrizione (Whisper)"
-        segments = transcribe.run(wav, CFG, language=opts["language"])
+        # ripartizione della barra: trascrizione la fetta grande, diarization se attiva
+        tr_hi = 55 if opts["diarize"] else 90
+        stage("Trascrizione in corso", 4)
+        stop = threading.Event()
+        threading.Thread(target=_ramp, args=(j, 4, tr_hi, secs / 8.0, stop), daemon=True).start()
+        try:
+            segments = transcribe.run(wav, CFG, language=opts["language"])
+        finally:
+            stop.set()
+        j["progress"] = tr_hi
 
         if opts["diarize"]:
-            j["stage"] = "Riconoscimento di chi parla"
-            turns = diarize.run(wav, CFG, preset=opts["preset"], num_speakers=opts["num_speakers"])
-            segments = merge.assign_speakers(segments, turns)
+            stage("Riconoscimento di chi parla", tr_hi)
 
-        j["stage"] = "Post-elaborazione"
+            def diar_progress(frac):
+                j["progress"] = int(tr_hi + (90 - tr_hi) * frac)
+
+            turns = diarize.run(wav, CFG, preset=opts["preset"],
+                                num_speakers=opts["num_speakers"], progress=diar_progress)
+            segments = merge.assign_speakers(segments, turns)
+            j["progress"] = 90
+
+        stage("Pulizia e organizzazione del testo", 94)
         lang = opts["language"] if opts["language"] != "auto" else CFG.get("language", "it")
         j["result"] = postprocess.run(segments, CFG, language=lang, mode=opts["mode"])
         j["mode"] = opts["mode"]
+        stage("Completato", 100)
         j["state"] = "done"
-        j["stage"] = "Completato"
     except Exception as e:
         j["state"] = "error"
         j["error"] = f"{e}\n{traceback.format_exc()}"
@@ -81,7 +110,7 @@ def start():
         "preset": request.form.get("preset", CFG["diarization"].get("preset", "riunione")),
         "num_speakers": int(ns) if ns.isdigit() else None,
     }
-    jobs[job_id] = {"state": "running", "stage": "In coda", "name": name}
+    jobs[job_id] = {"state": "running", "stage": "In coda", "progress": 0, "name": name}
     threading.Thread(target=_pipeline, args=(job_id, src, opts), daemon=True).start()
     return jsonify(job_id=job_id)
 
@@ -91,7 +120,8 @@ def status(job_id):
     j = jobs.get(job_id)
     if not j:
         return jsonify(state="error", error="job sconosciuto"), 404
-    return jsonify(state=j["state"], stage=j.get("stage", ""), error=j.get("error", ""))
+    return jsonify(state=j["state"], stage=j.get("stage", ""),
+                   progress=j.get("progress", 0), error=j.get("error", ""))
 
 
 @app.get("/download/<job_id>.<fmt>")
