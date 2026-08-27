@@ -30,6 +30,26 @@ def test_merge_no_overlap_defaults():
     assert out[0]["speaker"] == "Speaker 1"
 
 
+def test_group_turns():
+    segs = [
+        {"start": 0.0, "end": 2.0, "text": "ciao", "speaker": "Speaker 1"},
+        {"start": 2.1, "end": 4.0, "text": "come va", "speaker": "Speaker 1"},   # stesso spk, no gap
+        {"start": 10.0, "end": 12.0, "text": "dopo pausa", "speaker": "Speaker 1"},  # stesso spk, gap
+        {"start": 12.0, "end": 14.0, "text": "rispondo io", "speaker": "Speaker 2"},  # cambio spk
+    ]
+    turns = merge.group_turns(segs, para_gap=2.5)
+    assert len(turns) == 2
+    assert turns[0]["speaker"] == "Speaker 1" and turns[1]["speaker"] == "Speaker 2"
+    assert turns[0]["paras"] == ["ciao come va", "dopo pausa"]
+    assert turns[1]["paras"] == ["rispondo io"]
+
+
+def test_group_turns_no_speaker():
+    segs = [{"start": 0.0, "end": 2.0, "text": "a"}, {"start": 2.2, "end": 4.0, "text": "b"}]
+    turns = merge.group_turns(segs)
+    assert len(turns) == 1 and turns[0]["speaker"] is None and turns[0]["paras"] == ["a b"]
+
+
 def test_fillers_removed():
     r = postprocess.run([{"start": 0.0, "end": 1.0, "text": "ehm allora cioè iniziamo no?"}], CFG)
     assert "ehm" not in r["segments"][0]["text"]

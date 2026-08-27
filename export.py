@@ -1,6 +1,7 @@
 """Esportazione: testo semplice, sottotitoli SRT/VTT, Word DOCX formattato."""
 from docx import Document
-from docx.shared import Pt
+
+import merge
 
 
 def _hms(sec, sep=":", ms=False):
@@ -60,12 +61,14 @@ def to_docx(result, path, source_name="", mode="lezione"):
     doc.add_heading("Trascrizione", level=1)
     for sec in result["sections"]:
         doc.add_heading(f"Sezione {sec['index']}  ({_hms(sec['start'])})", level=2)
-        for seg in sec["segments"]:
-            p = doc.add_paragraph()
-            if seg.get("speaker"):
-                p.add_run(f"{seg['speaker']} ").bold = True
-            p.add_run(f"[{_hms(seg['start'])}] ").font.size = Pt(8)
-            p.add_run(seg["text"])
+        for turn in merge.group_turns(sec["segments"]):
+            # intestazione (speaker + timestamp) solo a ogni cambio di speaker
+            if turn["speaker"]:
+                head = doc.add_paragraph()
+                head.add_run(f"{turn['speaker']}  ").bold = True
+                head.add_run(f"[{_hms(turn['start'])}]").italic = True
+            for para in turn["paras"]:
+                doc.add_paragraph(para)
 
     doc.save(str(path))
     return path
