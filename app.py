@@ -72,6 +72,7 @@ def start():
     job_id = uuid.uuid4().hex[:12]
     src = WORK / f"{job_id}_{Path(f.filename).name}"
     f.save(src)
+    name = Path(f.filename or "").stem or "trascrizione"  # nome dei file scaricati
     ns = request.form.get("num_speakers", "").strip()
     opts = {
         "language": request.form.get("language", CFG.get("language", "it")),
@@ -80,7 +81,7 @@ def start():
         "preset": request.form.get("preset", CFG["diarization"].get("preset", "riunione")),
         "num_speakers": int(ns) if ns.isdigit() else None,
     }
-    jobs[job_id] = {"state": "running", "stage": "In coda"}
+    jobs[job_id] = {"state": "running", "stage": "In coda", "name": name}
     threading.Thread(target=_pipeline, args=(job_id, src, opts), daemon=True).start()
     return jsonify(job_id=job_id)
 
@@ -100,9 +101,10 @@ def download(job_id, fmt):
         return "non pronto", 409
     if fmt not in ("txt", "srt", "vtt", "docx"):
         return "formato non valido", 400
+    name = j.get("name", "trascrizione")
     out = WORK / f"{job_id}.{fmt}"
-    export.write(j["result"], fmt, out, source_name=job_id, mode=j["mode"])
-    return send_file(out, as_attachment=True, download_name=f"trascrizione.{fmt}")
+    export.write(j["result"], fmt, out, source_name=name, mode=j["mode"])
+    return send_file(out, as_attachment=True, download_name=f"{name}.{fmt}")
 
 
 if __name__ == "__main__":
