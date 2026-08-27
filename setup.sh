@@ -20,6 +20,12 @@ echo "==> Installo le dipendenze"
 pip install -q -U pip
 pip install -q -r requirements.txt
 
+# mlx-whisper dichiara torch fra le dipendenze ma non lo importa mai (serve solo
+# alla conversione dei checkpoint OpenAI, che non facciamo). Toglierlo = ~600MB in meno.
+echo "==> Rimuovo pacchetti pesanti non usati (torch e derivati)"
+pip uninstall -q -y torch sympy mpmath networkx || true
+rm -rf .venv/lib/python*/site-packages/torch
+
 echo "==> Scarico i modelli (una volta sola)"
 python download_models.py
 

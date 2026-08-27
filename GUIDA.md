@@ -8,7 +8,7 @@
 ~/Documents/Sbobiner
 ```
 
-Anche i modelli (Whisper + riconoscimento voci, ~1,5 GB) sono già scaricati.
+Anche i modelli (Whisper + riconoscimento voci, ~500 MB) sono già scaricati.
 Da qui in poi funziona **offline**.
 
 Per spostarlo su un altro Mac: copia l'intera cartella e ripeti l'installazione qui sotto

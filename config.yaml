@@ -6,12 +6,14 @@
 language: it
 
 model:
-  # small | medium | large-v3-turbo | large-v3-turbo-q4 | large-v3
-  # Mac 8GB RAM: "large-v3-turbo" e' il default consigliato.
-  #   - se noti rallentamenti o swap: passa a "large-v3-turbo-q4" (~450MB, poco meno preciso)
-  #   - se ancora lento: "medium", poi "small"
-  #   - se hai 16GB+ e vuoi il massimo: "large-v3"
-  name: large-v3-turbo
+  # small (~500MB) | medium (~1.5GB) | large-v3-turbo-q4 (~460MB) |
+  # large-v3-turbo (~1.5GB) | large-v3 (~3GB)
+  # Default: "large-v3-turbo-q4" = turbo quantizzato a 4 bit. Leggero e piu' veloce
+  # (su 8GB il collo di bottiglia e' la memoria), qualita' vicina a large-v3-turbo.
+  #   - vuoi un filo di precisione in piu' e hai spazio: "large-v3-turbo"
+  #   - ancora piu' veloce, meno preciso: "small"
+  #   - 16GB+ e massima precisione: "large-v3"
+  name: large-v3-turbo-q4
 
 # Termini iniettati come bias nella trascrizione (nomi propri, sigle, gergo).
 # Riduce gli errori su terminologia specifica. Max ~200 parole totali: oltre, i primi vincono.

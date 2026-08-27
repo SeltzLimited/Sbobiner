@@ -22,7 +22,8 @@ Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (modelli lib
 Doppio click su **`setup.command`** dal Finder (oppure `./setup.sh` da terminale).
 
 Crea l'ambiente virtuale, installa le dipendenze e scarica i modelli
-(~1.5 GB per Whisper + ~30 MB per la diarization). `ffmpeg` è incluso, non va installato.
+(~460 MB per Whisper + ~35 MB per la diarization). `ffmpeg` è incluso, non va installato.
+Ingombro totale dell'installazione: **~1,1 GB** (`.venv` + modelli).
 
 ## Uso quotidiano (offline)
 
@@ -56,22 +57,24 @@ language: it        # italiano (default)
 
 ```yaml
 model:
-  name: large-v3-turbo
+  name: large-v3-turbo-q4
 ```
 
 | Valore | Peso | Note |
 |---|---|---|
-| `large-v3-turbo` | ~1.5 GB | **default**. Ottimo compromesso, va bene su 8 GB. |
-| `large-v3-turbo-q4` | ~0.5 GB | usalo se noti swap / lentezza da memoria piena |
-| `medium` | ~1.5 GB | fallback se turbo dà problemi |
-| `small` | ~0.5 GB | veloce, meno preciso |
-| `large-v3` | ~3 GB | massima precisione, consigliato con 16 GB+ |
+| `large-v3-turbo-q4` | ~460 MB | **default**. turbo quantizzato a 4 bit: leggero, qualità vicina al turbo pieno. |
+| `large-v3-turbo` | ~1.5 GB | un filo più preciso, occupa 3× lo spazio. |
+| `medium` | ~1.5 GB | fallback. |
+| `small` | ~500 MB | ~2× più veloce, meno preciso. |
+| `large-v3` | ~3 GB | massima precisione, consigliato con 16 GB+. |
 
-Dopo aver cambiato `name`, riesegui `python download_models.py` (con la `.venv` attiva) per scaricarlo.
+Dopo aver cambiato `name`, riesegui `python download_models.py` (con la `.venv` attiva) per scaricarlo:
+stampa anche il comando per cancellare il modello vecchio dalla cache e recuperare spazio.
 
-Perché `large-v3-turbo`: è `large-v3` distillato (8 layer di decoder invece di 32).
-Precisione in trascrizione quasi identica, ma 4–8× più veloce e con impronta di memoria
-paragonabile a `medium` — quindi conviene anche su una macchina da 8 GB.
+Perché il turbo (e non `large-v3`): è `large-v3` distillato (8 layer di decoder invece di 32),
+precisione in trascrizione quasi identica ma molto più veloce. La variante `-q4` dimezza
+ancora il peso su disco con una perdita di qualità minima; la velocità resta simile
+(su 8 GB il collo di bottiglia non è solo la memoria).
 
 ### Glossario e correzioni
 
@@ -130,9 +133,11 @@ fine-tuning LoRA leggero di Whisper; si aggiunge come script separato senza tocc
 
 ## Note
 
-- Velocità misurata su Mac 8 GB con `large-v3-turbo`: ~12× il tempo reale
-  (38 min di audio → ~3 min di trascrizione). Senza diarization.
-- Tutto resta in locale, nella cartella `work/` (ignorata da git). Svuotala quando vuoi.
+- Velocità misurata su Mac 8 GB con `large-v3-turbo-q4`: ~12× il tempo reale
+  (38 min di audio → ~3,5 min di trascrizione). Senza diarization. Per andare più
+  veloci: `model.name: small` in `config.yaml` (circa il doppio, meno preciso).
+- Tutto resta in locale, nella cartella `work/` (ignorata da git). Contiene anche il
+  `.wav` intermedio (~2 MB/min): svuotala quando vuoi.
 
 ## Crediti
 
