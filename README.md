@@ -9,14 +9,13 @@ Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (modelli lib
 
 ---
 
+**Guida per chi non usa il terminale:** [`GUIDA.md`](GUIDA.md).
+
 ## Setup iniziale (una volta sola, serve internet)
 
-```bash
-cd ~/Documents/trascrizione-offline
-./setup.sh
-```
+Doppio click su **`setup.command`** dal Finder (oppure `./setup.sh` da terminale).
 
-Lo script crea l'ambiente virtuale, installa le dipendenze e scarica i modelli
+Crea l'ambiente virtuale, installa le dipendenze e scarica i modelli
 (~1.5 GB per Whisper + ~30 MB per la diarization). `ffmpeg` è incluso, non va installato.
 
 ## Uso quotidiano (offline)
