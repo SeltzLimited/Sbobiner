@@ -1,5 +1,11 @@
 # Sbobiner
 
+> Sempre più difficile trascrivere un audio. Tutti i servizi sono a pagamento o funzionano male.
+> Questo non sarà perfetto, ma fa il suo. E il file resta sul tuo pc.
+> Fatto per MAC perché è quello che uso al momento. Liberi di contribuire.
+>
+> N.B.: Non puoi trascrivere un concerto.
+
 Pipeline di trascrizione per **lezioni e riunioni**, costruita sopra Whisper.
 Gira interamente **offline** dopo il setup iniziale. Nessun account, nessun token.
 
