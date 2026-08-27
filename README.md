@@ -127,3 +127,20 @@ fine-tuning LoRA leggero di Whisper; si aggiunge come script separato senza tocc
 - Velocità misurata su Mac 8 GB con `large-v3-turbo`: ~12× il tempo reale
   (38 min di audio → ~3 min di trascrizione). Senza diarization.
 - Tutto resta in locale, nella cartella `work/` (ignorata da git). Svuotala quando vuoi.
+
+## Crediti
+
+Sviluppato con [Claude](https://claude.ai) (Claude Code) usando il plugin
+**[ponytail](https://github.com/DietrichGebert/ponytail)** in modalità `ultra`, che spinge
+verso la soluzione più semplice che funziona: libreria standard e funzionalità native
+prima di aggiungere dipendenze o codice custom.
+
+Componenti di terze parti: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples)
+(MIT) · [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (Apache-2.0) ·
+[Whisper](https://github.com/openai/whisper) (MIT) · [Flask](https://flask.palletsprojects.com)
+(BSD-3) · [python-docx](https://github.com/python-openxml/python-docx) (MIT).
+I pesi dei modelli scaricati da `download_models.py` hanno licenze proprie dei rispettivi autori.
+
+## Licenza
+
+[MIT](LICENSE).
