@@ -4,13 +4,13 @@
 > Questo non sarà perfetto, ma fa il suo. E il file resta sul tuo pc.
 > Fatto per MAC perché è quello che uso al momento. Liberi di contribuire.
 >
+> Installi una sola volta. Carichi il file. Trascrivi. Scarichi la trascrizione. Fine.
 > N.B.: Non puoi trascrivere un concerto.
 
-Pipeline di trascrizione per **lezioni e riunioni**, costruita sopra Whisper.
+Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
 Gira interamente **offline** dopo il setup iniziale. Nessun account, nessun token.
 
 Motore: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples/tree/main/whisper)
-(accelerazione Metal su Apple Silicon).
 Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (modelli liberi, senza gating).
 
 ---
@@ -19,29 +19,28 @@ Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (modelli lib
 
 ## Setup iniziale (una volta sola, serve internet)
 
-Doppio click su **`setup.command`** dal Finder (oppure `./setup.sh` da terminale).
+Doppio click su **`setup.command`**.
 
-Crea l'ambiente virtuale, installa le dipendenze e scarica i modelli
+Questo crea l'ambiente virtuale, installa le dipendenze e scarica i modelli
 (~460 MB per Whisper + ~35 MB per la diarization). `ffmpeg` è incluso, non va installato.
 Ingombro totale dell'installazione: **~1,1 GB** (`.venv` + modelli).
 
-## Uso quotidiano (offline)
+## Uso quotidiano (Offline)
 
 Doppio click su **`start.command`** dal Finder.
 Si apre il browser su `http://127.0.0.1:5000`: trascina il file, scegli le opzioni, premi **Trascrivi**.
 A fine elaborazione scarichi in **TXT**, **SRT**, **VTT** o **DOCX**.
 
-> Primo avvio: macOS può bloccare `start.command` ("sviluppatore non identificato").
-> Tasto destro sul file → **Apri** → **Apri**. Solo la prima volta.
-
 Formati in ingresso: qualsiasi cosa `ffmpeg` sappia leggere (mp3, wav, m4a, aac, ogg, flac,
 e anche video mp4/mkv/mov — l'audio viene estratto in automatico).
+
+N.B. la finestra del terminale deve rimanere aperta per permettere a Sbobiner di funzionare nella pagina web.
 
 ---
 
 ## Configurazione — `config.yaml`
 
-Tutto si regola da lì, senza toccare il codice.
+Tutto si può regolare da lì, senza toccare il codice.
 
 ### Cambiare lingua
 
@@ -50,10 +49,10 @@ language: it        # italiano (default)
 ```
 
 - Un'altra lingua: metti il codice ISO 639-1 (`en`, `fr`, `de`, `es`, `pt`, ...).
-- `auto`: Whisper rileva la lingua da solo (più lento, un po' meno preciso).
-- Si può anche scegliere al volo dal menu **Lingua** nella pagina web, senza modificare il file.
+- `auto`: Whisper rileva la lingua da solo (più lento, meno preciso).
+- Si può anche scegliere dal menu **Lingua** nella pagina web, senza modificare il file.
 
-### Modello Whisper (importante con 8 GB di RAM)
+### Modello Whisper
 
 ```yaml
 model:
@@ -66,15 +65,14 @@ model:
 | `large-v3-turbo` | ~1.5 GB | un filo più preciso, occupa 3× lo spazio. |
 | `medium` | ~1.5 GB | fallback. |
 | `small` | ~500 MB | ~2× più veloce, meno preciso. |
-| `large-v3` | ~3 GB | massima precisione, consigliato con 16 GB+. |
+| `large-v3` | ~3 GB | massima precisione, consigliato con 16 GB+ di RAM. |
 
 Dopo aver cambiato `name`, riesegui `python download_models.py` (con la `.venv` attiva) per scaricarlo:
 stampa anche il comando per cancellare il modello vecchio dalla cache e recuperare spazio.
 
 Perché il turbo (e non `large-v3`): è `large-v3` distillato (8 layer di decoder invece di 32),
 precisione in trascrizione quasi identica ma molto più veloce. La variante `-q4` dimezza
-ancora il peso su disco con una perdita di qualità minima; la velocità resta simile
-(su 8 GB il collo di bottiglia non è solo la memoria).
+ancora il peso su disco con una perdita di qualità minima; la velocità resta simile.
 
 ### Glossario e correzioni
 
@@ -126,17 +124,11 @@ i cambi di sezione, frasi-chiave per sezioni / action item / decisioni. Tutte mo
 | `download_models.py` | scarica i modelli una volta |
 | `test_pipeline.py` | self-check: `python test_pipeline.py` |
 
-## Fine-tuning (in futuro)
-
-Non incluso: serve materiale già trascritto. Quando lo avrai, `mlx` supporta il
-fine-tuning LoRA leggero di Whisper; si aggiunge come script separato senza toccare la pipeline.
-
 ## Note
 
 - Velocità misurata su Mac 8 GB con `large-v3-turbo-q4`: ~12× il tempo reale
-  (38 min di audio → ~3,5 min di trascrizione). Senza diarization. Per andare più
-  veloci: `model.name: small` in `config.yaml` (circa il doppio, meno preciso).
-- Tutto resta in locale, nella cartella `work/` (ignorata da git). Contiene anche il
+  (38 min di audio → ~3,5 min di trascrizione). Senza diarization.
+- Tutto resta in locale, nella cartella `work/`. Contiene anche il
   `.wav` intermedio (~2 MB/min): svuotala quando vuoi.
 
 ## Crediti
