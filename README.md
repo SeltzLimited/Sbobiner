@@ -20,7 +20,7 @@
 "If it works, I'm a genius. If it doesn't, it's the AI's fault."
 </p>
 
-PER ORA SOLO MAC APPLE SILICON
+PER ORA SOLO MAC CON APPLE SILICON
 
 Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
 Gira interamente **offline** dopo il setup iniziale. Nessun account, nessun token.
