@@ -1,10 +1,12 @@
 # Sbobiner
 
+*🇬🇧 [English version below](diventa Sbobyner).*
+
 > Sempre più difficile trascrivere un audio. Tutti i servizi sono a pagamento o funzionano male.
 > Questo non sarà perfetto, ma fa il suo. E il file resta sul tuo pc.
 > Fatto per MAC perché è quello che uso al momento. Liberi di contribuire.
 >
-> Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro). Scarichi la trascrizione. Fine.
+> Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro). Salvi la trascrizione. Fine.
 > N.B.: Non puoi trascrivere un concerto.
 
 <p align="center">
@@ -13,6 +15,9 @@
 
 <p align="center">
   <a href="https://ko-fi.com/E7D425WCX9"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Offrimi un caffè su Ko-fi"></a>
+</p>
+<p align="center">
+"If it works, I'm a genius. If it doesn't, it's the AI's fault."
 </p>
 
 PER ORA SOLO MAC APPLE SILICON
@@ -160,5 +165,169 @@ Se ti è utile: [offrimi un caffè su Ko-fi](https://ko-fi.com/E7D425WCX9). Graz
 Vedi [CHANGELOG.md](CHANGELOG.md).
 
 ## Licenza
+
+[MIT](LICENSE).
+
+---
+---
+
+<a id="english"></a>
+
+# Sbobyner — in English
+
+*🇮🇹 [Versione italiana sopra].*
+
+> Transcribing audio keeps getting harder. Every service is paid or works badly.
+> This won't be perfect, but it does the job. And the file stays on your computer.
+> Built for Mac because that's what I use right now. Contributions welcome.
+>
+> Install once. Drop in the file. Transcribe (do something else meanwhile). Save the transcript. Done.
+> N.B.: you can't transcribe a concert.
+
+**MAC WITH APPLE SILICON ONLY, FOR NOW**
+
+Transcription pipeline for **lectures and meetings**, built on Whisper.
+Runs entirely **offline** after the initial setup. No account, no token.
+
+Engine: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples/tree/main/whisper)
+Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx).
+
+---
+
+## Initial setup (first time only, needs internet)
+
+Double-click **`setup.command`**.
+
+This creates the virtual environment, installs the dependencies and downloads the models
+(~460 MB for Whisper + ~35 MB for diarization). `ffmpeg` is bundled, nothing to install.
+Total install footprint: **~1.1 GB** (`.venv` + models).
+
+## Daily use (offline)
+
+Double-click **`start.command`** from Finder.
+The browser opens at `http://127.0.0.1:5000`: drop the file, pick the options, press **Trascrivi** ("Transcribe").
+When it's done you download as **TXT**, **SRT**, **VTT** or **DOCX**.
+
+Input formats: anything `ffmpeg` can read (mp3, wav, m4a, aac, ogg, flac,
+and video mp4/mkv/mov too — the audio is extracted automatically).
+
+N.B. the terminal window must stay open for Sbobyner to keep serving the web page.
+
+---
+
+## Configuration — `config.yaml`
+
+Everything can be tuned there, without touching the code.
+
+### Change language
+
+```yaml
+language: it        # italian (default)
+```
+
+- Change language via ISO 639-1 code (`en`, `fr`, `de`, `es`, `pt`, ...).
+- `auto`: Whisper detects the language on its own (slower, less accurate).
+
+### Whisper model
+
+```yaml
+model:
+  name: large-v3-turbo-q4
+```
+
+| Value | Size | Notes |
+|---|---|---|
+| `large-v3-turbo-q4` | ~460 MB | **default**. 4-bit quantized turbo: light, quality close to the full turbo. |
+| `large-v3-turbo` | ~1.5 GB | slightly more accurate, 3× the disk space. |
+| `medium` | ~1.5 GB | fallback. |
+| `small` | ~500 MB | ~2× faster, less accurate. |
+| `large-v3` | ~3 GB | maximum accuracy, recommended with 16 GB+ of RAM. |
+
+After changing `name`, run `python download_models.py` again (with the `.venv` active) to fetch it:
+it also prints the command to delete the old model from the cache and reclaim space.
+
+Why turbo (and not `large-v3`): it's `large-v3` distilled (8 decoder layers instead of 32),
+transcription accuracy almost identical but faster. The `-q4` variant halves the disk
+size again with minimal quality loss; speed stays about the same.
+
+### Glossary and corrections
+
+```yaml
+glossary:            # injected as bias: helps with proper nouns and technical terms
+  - Kubernetes
+  - "Rossi"          # surnames that recur in the course/team
+corrections:         # exact downstream replacement, if a term still comes out wrong
+  "cuber netes": Kubernetes
+```
+
+### Diarization (who's speaking) by context
+
+```yaml
+diarization:
+  preset: riunione   # or: aula
+  aula:      { num_speakers: null, cluster_threshold: 0.70 }
+  riunione:  { num_speakers: null, cluster_threshold: 0.50 }
+```
+
+- `aula` (classroom): many people, higher threshold (groups more, avoids inventing voices).
+- `riunione` (meeting): few people, lower threshold (separates 2–6 speakers better).
+- If you know how many people speak, set `num_speakers` (e.g. `3`) or use the
+  **N. persone** field on the web page: diarization becomes more stable.
+
+### Lecture/meeting post-processing
+
+In `config.yaml` → `postprocess`: list of filler words to strip, pause threshold for
+section breaks, trigger phrases for sections / action items / decisions. All editable.
+
+> Sections and action items are **heuristic** (pauses + trigger phrases), not ML.
+> If one day the accuracy isn't enough, the hook for a local LLM pass is in
+> `postprocess.py` (`_split_sections` / `_extract`), marked with a `ponytail:` comment.
+
+---
+
+## Layout
+
+| File | Responsibility |
+|---|---|
+| `audio.py` | normalize any input → 16 kHz mono wav |
+| `transcribe.py` | Whisper engine + glossary injection |
+| `diarize.py` | speaker diarization (sherpa-onnx), presets by context |
+| `merge.py` | align text ↔ speaker |
+| `postprocess.py` | cleanup, sections, action items, decisions |
+| `export.py` | TXT / SRT / VTT / DOCX |
+| `app.py` + `templates/index.html` | local server and web page |
+| `config.yaml` | all configuration |
+| `download_models.py` | download the models once |
+| `test_pipeline.py` | self-check: `python test_pipeline.py` |
+
+## Notes
+
+- Speed measured on an 8 GB Mac with `large-v3-turbo-q4`
+  (38 min of audio → ~3.5 min of transcription). Without diarization.
+- Everything stays local, in the `work/` folder. It also holds the intermediate
+  `.wav` (~2 MB/min): empty it whenever you want.
+
+## Credits
+
+Built with [Claude](https://claude.ai) (Claude Code) using the
+**[ponytail](https://github.com/DietrichGebert/ponytail)** plugin in `ultra` mode, which pushes
+toward the simplest thing that works: standard library and native features
+before adding dependencies or custom code.
+
+Third-party components: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples)
+(MIT) · [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (Apache-2.0) ·
+[Whisper](https://github.com/openai/whisper) (MIT) · [Flask](https://flask.palletsprojects.com)
+(BSD-3) · [python-docx](https://github.com/python-openxml/python-docx) (MIT).
+The model weights downloaded by `download_models.py` have their own licenses from their respective authors.
+
+## Support the project
+
+If you find it useful: [buy me a coffee on Ko-fi](https://ko-fi.com/E7D425WCX9). Thanks.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
+## License
 
 [MIT](LICENSE).
