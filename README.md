@@ -15,7 +15,7 @@
   <a href="https://ko-fi.com/E7D425WCX9"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Offrimi un caffè su Ko-fi"></a>
 </p>
 
-PER ORA SOLO MAC APPLE SILICON
+PER ORA SOLO MAC CON APPLE SILICON
 
 Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
 Gira interamente **offline** dopo il setup iniziale. Nessun account, nessun token.
