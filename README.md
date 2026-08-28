@@ -7,6 +7,14 @@
 > Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro). Scarichi la trascrizione. Fine.
 > N.B.: Non puoi trascrivere un concerto.
 
+<p align="center">
+  <img src="static/SBOB.png" alt="Interfaccia di Sbobiner" width="620">
+</p>
+
+<p align="center">
+  <a href="https://ko-fi.com/E7D425WCX9"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Offrimi un caffè su Ko-fi"></a>
+</p>
+
 PER ORA SOLO MAC APPLE SILICON
 
 Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
@@ -142,6 +150,10 @@ Componenti di terze parti: [`mlx-whisper`](https://github.com/ml-explore/mlx-exa
 [Whisper](https://github.com/openai/whisper) (MIT) · [Flask](https://flask.palletsprojects.com)
 (BSD-3) · [python-docx](https://github.com/python-openxml/python-docx) (MIT).
 I pesi dei modelli scaricati da `download_models.py` hanno licenze proprie dei rispettivi autori.
+
+## Sostieni il progetto
+
+Se ti è utile: [offrimi un caffè su Ko-fi](https://ko-fi.com/E7D425WCX9). Grazie.
 
 ## Changelog
 
