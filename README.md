@@ -4,7 +4,6 @@
 
 > Sempre più difficile trascrivere un audio. Tutti i servizi sono a pagamento o funzionano male.
 > Questo non sarà perfetto, ma fa il suo. E il file resta sul tuo pc.
-> Fatto per MAC perché è quello che uso al momento. Liberi di contribuire.
 >
 > Installi una sola volta. Carichi il file. Trascrivi (nel frattempo fai altro). Salvi la trascrizione. Fine.
 > N.B.: Non puoi trascrivere un concerto.
@@ -33,20 +32,19 @@ Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (modelli lib
 
 ## Setup iniziale (solo la prima volta, serve internet)
 
-**Mac** — scarica lo ZIP (**Code → Download ZIP**), estrailo e fai doppio click su **`setup.command`**.
+**Mac** — scarica lo ZIP, estrailo e fai doppio click su **`setup.command`**.
 - Se macOS lo blocca: **Impostazioni di Sistema → Privacy e sicurezza → Apri comunque**
   (una volta sola, anche per `start.command`).
 - Scarica ~460 MB per Whisper + ~35 MB per la diarization. Ingombro totale **~1,1 GB**.
 
-**Windows** — scarica lo ZIP (**Code → Download ZIP**), estrailo (es. in `C:\Sbobiner`,
-meglio un percorso senza lettere accentate) e fai doppio click su **`setup.bat`**.
+**Windows** — scarica lo ZIP, estrailo e fai doppio click su **`setup.bat`**.
 - Se compare *"Windows ha protetto il PC"*: **Ulteriori informazioni → Esegui comunque**.
 - Se Python manca, il setup propone di installarlo (winget): poi chiudi e riapri `setup.bat`.
 - Scarica ~1,6 GB di modello. Ingombro totale **~2 GB**, tutto dentro la cartella del
   programma: cancellandola disinstalli tutto.
 
 Il setup crea l'ambiente virtuale, installa le dipendenze e scarica i modelli.
-`ffmpeg` è incluso, non va installato.
+`ffmpeg` è incluso.
 
 ## Uso quotidiano (Offline)
 
@@ -202,7 +200,6 @@ Vedi [CHANGELOG.md](CHANGELOG.md).
 
 > Transcribing audio keeps getting harder. Every service is paid or works badly.
 > This won't be perfect, but it does the job. And the file stays on your computer.
-> Built for Mac because that's what I use right now. Contributions welcome.
 >
 > Install once. Drop in the file. Transcribe (do something else meanwhile). Save the transcript. Done.
 > N.B.: you can't transcribe a concert.
@@ -220,13 +217,12 @@ Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx).
 
 ## Initial setup (first time only, needs internet)
 
-**Mac** — download the ZIP (**Code → Download ZIP**), extract it and double-click **`setup.command`**.
+**Mac** — download the ZIP, extract it and double-click **`setup.command`**.
 - If macOS blocks it: **System Settings → Privacy & Security → Open Anyway**
   (only once, also for `start.command`).
 - Downloads ~460 MB for Whisper + ~35 MB for diarization. Total footprint **~1.1 GB**.
 
-**Windows** — download the ZIP (**Code → Download ZIP**), extract it (e.g. to `C:\Sbobiner`,
-preferably a path without accented letters) and double-click **`setup.bat`**.
+**Windows** — download the ZIP, extract it and double-click **`setup.bat`**.
 - If *"Windows protected your PC"* shows up: **More info → Run anyway**.
 - If Python is missing, the setup offers to install it (winget): then close and reopen `setup.bat`.
 - Downloads a ~1.6 GB model. Total footprint **~2 GB**, all inside the program folder:
