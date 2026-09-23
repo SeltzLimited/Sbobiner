@@ -16,7 +16,6 @@
   <a href="https://ko-fi.com/E7D425WCX9"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Offrimi un caffè su Ko-fi"></a>
 </p>
 <p align="center">
-"If it works, I'm a genius. If it doesn't, it's the AI's fault."
 </p>
 
 Funziona su **Mac con Apple Silicon** e su **Windows 10 / 11** (64 bit).
