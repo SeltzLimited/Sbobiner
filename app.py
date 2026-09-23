@@ -1,7 +1,12 @@
 """Server locale: apre il browser, riceve l'audio in drag&drop, restituisce la trascrizione.
 
-Uso quotidiano: doppio click su start.command. Tutto offline.
+Uso quotidiano: doppio click su start.command (Mac) o start.bat (Windows). Tutto offline.
 """
+import logging
+import os
+import re
+import subprocess
+import sys
 import threading
 import time
 import traceback
@@ -55,10 +60,15 @@ def _pipeline(job_id, src, opts):
         # ripartizione della barra: trascrizione la fetta grande, diarization se attiva
         tr_hi = 55 if opts["diarize"] else 90
         stage("Trascrizione in corso", 4)
+
+        def tr_progress(frac):
+            j["progress"] = int(4 + (tr_hi - 4) * frac)
+
         stop = threading.Event()
-        threading.Thread(target=_ramp, args=(j, 4, tr_hi, secs / 8.0, stop), daemon=True).start()
+        if not transcribe.REPORTS_PROGRESS:  # mlx-whisper non dice a che punto e': stima a tempo
+            threading.Thread(target=_ramp, args=(j, 4, tr_hi, secs / 8.0, stop), daemon=True).start()
         try:
-            segments = transcribe.run(wav, CFG, language=opts["language"])
+            segments = transcribe.run(wav, CFG, language=opts["language"], progress=tr_progress)
         finally:
             stop.set()
         j["progress"] = tr_hi
@@ -99,7 +109,9 @@ def index():
 def start():
     f = request.files["audio"]
     job_id = uuid.uuid4().hex[:12]
-    src = WORK / f"{job_id}_{Path(f.filename).name}"
+    # nome breve e senza caratteri strani: evita i limiti di lunghezza/caratteri dei percorsi Windows
+    suffix = re.sub(r"[^A-Za-z0-9.]", "", Path(f.filename or "").suffix)[:10]
+    src = WORK / f"{job_id}{suffix}"
     f.save(src)
     name = Path(f.filename or "").stem or "trascrizione"  # nome dei file scaricati
     ns = request.form.get("num_speakers", "").strip()
@@ -137,8 +149,25 @@ def download(job_id, fmt):
     return send_file(out, as_attachment=True, download_name=f"{name}.{fmt}")
 
 
+def _open_ui(url):
+    """Windows: finestra "app" di Edge, o di Chrome se Edge manca (niente schede ne' barra
+    degli indirizzi). Altrove, o se non trova nessuno dei due: browser predefinito."""
+    if sys.platform == "win32":
+        bases = [os.environ.get(k) for k in ("ProgramFiles(x86)", "ProgramFiles", "LOCALAPPDATA")]
+        for rel in (r"Microsoft\Edge\Application\msedge.exe", r"Google\Chrome\Application\chrome.exe"):
+            for base in filter(None, bases):
+                exe = Path(base) / rel
+                if exe.exists():
+                    subprocess.Popen([str(exe), f"--app={url}"])
+                    return
+    webbrowser.open(url)
+
+
 if __name__ == "__main__":
+    # niente log per ogni richiesta: su Windows, un click nella finestra nera sospende
+    # l'output e con lui il server, che scrive a ogni aggiornamento della barra.
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)
     url = "http://127.0.0.1:5000"
-    threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+    threading.Timer(1.0, lambda: _open_ui(url)).start()
     print(f"\n  Sbobiner attivo:  {url}\n  (chiudi questa finestra per fermare)\n")
     app.run(host="127.0.0.1", port=5000, use_reloader=False)

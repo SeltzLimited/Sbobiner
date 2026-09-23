@@ -3,6 +3,38 @@
 Tutte le modifiche rilevanti a Sbobiner.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it/1.1.0/).
 
+## [1.6.0] - 2026-09-23
+
+### Funzionalità
+
+- **Supporto Windows 10 e 11** (64 bit): `setup.bat` e `start.bat` a doppio click.
+  Il setup trova Python o propone di installarlo tramite winget, e controlla il
+  runtime Visual C++.
+- Su Windows la trascrizione usa **faster-whisper** su CPU (int8) con lo stesso
+  modello Whisper; la barra mostra l'avanzamento reale, non una stima.
+- Su Windows l'interfaccia si apre in una **finestra dedicata di Edge** (o di
+  Chrome, se Edge manca), senza schede né barra degli indirizzi; la barra del
+  titolo prende i colori di Sbobiner.
+- Su Windows i modelli restano nella cartella del programma: cancellandola si
+  disinstalla tutto.
+- Icona dell'applicazione (scheda del browser, finestra, barra delle applicazioni).
+
+### Modifiche
+
+- Dopo un cambio di modello, il setup propone di eliminare quelli non più usati
+  e lo fa tramite l'API di `huggingface_hub`: le versioni recenti condividono i
+  file grossi tra modelli e cancellare la cartella a mano non liberava spazio.
+- Guida e README aggiornati con l'installazione su Windows; corretti i link tra
+  la parte italiana e quella inglese del README.
+
+### Correzioni
+
+- Un file trascinato fuori dal riquadro non sostituisce più la pagina.
+- Il selettore file mostra anche `.m4a`, `.opus`, `.wma` e simili, che su
+  Windows il filtro `audio/*` poteva nascondere.
+- Il server non si blocca più se si clicca dentro la finestra nera su Windows
+  (niente più log a ogni richiesta).
+
 ## [1.5.0] - 2026-08-27
 
 Prima release pubblica.
@@ -50,4 +82,5 @@ Prima release pubblica.
 - La trascrizione non richiede più un `ffmpeg` di sistema: l'audio normalizzato
   viene passato direttamente ai motori come array.
 
+[1.6.0]: https://github.com/SeltzLimited/Sbobiner/releases/tag/v1.6.0
 [1.5.0]: https://github.com/SeltzLimited/Sbobiner/releases/tag/v1.5.0

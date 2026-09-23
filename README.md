@@ -1,6 +1,6 @@
 # Sbobiner
 
-*🇬🇧 [English version below](diventa Sbobyner).*
+*🇬🇧 [English version below](#english).*
 
 > Sempre più difficile trascrivere un audio. Tutti i servizi sono a pagamento o funzionano male.
 > Questo non sarà perfetto, ma fa il suo. E il file resta sul tuo pc.
@@ -20,34 +20,49 @@
 "If it works, I'm a genius. If it doesn't, it's the AI's fault."
 </p>
 
-PER ORA SOLO MAC CON APPLE SILICON
+Funziona su **Mac con Apple Silicon** e su **Windows 10 / 11** (64 bit).
 
 Pipeline di trascrizione per **lezioni e riunioni**, costruita su Whisper.
 Gira interamente **offline** dopo il setup iniziale. Nessun account, nessun token.
 
-Motore: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples/tree/main/whisper)
+Motore: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples/tree/main/whisper) su Mac (GPU),
+[`faster-whisper`](https://github.com/SYSTRAN/faster-whisper) su Windows (CPU).
 Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (modelli liberi, senza gating).
 
 ---
 
 ## Setup iniziale (solo la prima volta, serve internet)
 
-Doppio click su **`setup.command`**.
+**Mac** — scarica lo ZIP (**Code → Download ZIP**), estrailo e fai doppio click su **`setup.command`**.
+- Se macOS lo blocca: **Impostazioni di Sistema → Privacy e sicurezza → Apri comunque**
+  (una volta sola, anche per `start.command`).
+- Scarica ~460 MB per Whisper + ~35 MB per la diarization. Ingombro totale **~1,1 GB**.
 
-Questo crea l'ambiente virtuale, installa le dipendenze e scarica i modelli
-(~460 MB per Whisper + ~35 MB per la diarization). `ffmpeg` è incluso, non va installato.
-Ingombro totale dell'installazione: **~1,1 GB** (`.venv` + modelli).
+**Windows** — scarica lo ZIP (**Code → Download ZIP**), estrailo (es. in `C:\Sbobiner`,
+meglio un percorso senza lettere accentate) e fai doppio click su **`setup.bat`**.
+- Se compare *"Windows ha protetto il PC"*: **Ulteriori informazioni → Esegui comunque**.
+- Se Python manca, il setup propone di installarlo (winget): poi chiudi e riapri `setup.bat`.
+- Scarica ~1,6 GB di modello. Ingombro totale **~2 GB**, tutto dentro la cartella del
+  programma: cancellandola disinstalli tutto.
+
+Il setup crea l'ambiente virtuale, installa le dipendenze e scarica i modelli.
+`ffmpeg` è incluso, non va installato.
 
 ## Uso quotidiano (Offline)
 
-Doppio click su **`start.command`** dal Finder.
-Si apre il browser su `http://127.0.0.1:5000`: trascina il file, scegli le opzioni, premi **Trascrivi**.
+**Mac** — doppio click su **`start.command`** dal Finder: si apre il browser su `http://127.0.0.1:5000`.
+
+**Windows** — doppio click su **`start.bat`**: si apre una **finestra dedicata di Edge**
+(o di Chrome, se Edge manca), senza schede né barra degli indirizzi.
+
+Trascina il file, scegli le opzioni, premi **Trascrivi**.
 A fine elaborazione scarichi in **TXT**, **SRT**, **VTT** o **DOCX**.
 
 Formati in ingresso: qualsiasi cosa `ffmpeg` sappia leggere (mp3, wav, m4a, aac, ogg, flac,
 e anche video mp4/mkv/mov — l'audio viene estratto in automatico).
 
-N.B. la finestra del terminale deve rimanere aperta per permettere a Sbobiner di funzionare nella pagina web.
+N.B. la finestra del terminale (la finestra nera su Windows) deve rimanere aperta per permettere
+a Sbobiner di funzionare nella pagina web.
 
 ---
 
@@ -79,12 +94,15 @@ model:
 | `small` | ~500 MB | ~2× più veloce, meno preciso. |
 | `large-v3` | ~3 GB | massima precisione, consigliato con 16 GB+ di RAM. |
 
-Dopo aver cambiato `name`, riesegui `python download_models.py` (con la `.venv` attiva) per scaricarlo:
-stampa anche il comando per cancellare il modello vecchio dalla cache e recuperare spazio.
+Dopo aver cambiato `name`, rifai il setup (`setup.command` / `setup.bat`) per scaricarlo:
+alla fine propone di eliminare il modello vecchio e recuperare spazio.
 
 Perché il turbo (e non `large-v3`): è `large-v3` distillato (8 layer di decoder invece di 32),
 precisione in trascrizione quasi identica ma molto più veloce. La variante `-q4` dimezza
 ancora il peso su disco con una perdita di qualità minima; la velocità resta simile.
+
+Su **Windows** i pesi indicati sono quelli del Mac: lì non esiste il 4 bit, quindi
+`large-v3-turbo-q4` e `large-v3-turbo` sono lo stesso modello (~1,6 GB, quantizzato int8 al caricamento).
 
 ### Glossario e correzioni
 
@@ -134,12 +152,16 @@ i cambi di sezione, frasi-chiave per sezioni / action item / decisioni. Tutte mo
 | `app.py` + `templates/index.html` | server locale e pagina web |
 | `config.yaml` | tutta la configurazione |
 | `download_models.py` | scarica i modelli una volta |
+| `setup.command` / `setup.bat` | installazione (Mac / Windows) |
+| `start.command` / `start.bat` | avvio quotidiano (Mac / Windows) |
 | `test_pipeline.py` | self-check: `python test_pipeline.py` |
 
 ## Note
 
 - Velocità misurata su Mac 8 GB con `large-v3-turbo-q4`
   (38 min di audio → ~3,5 min di trascrizione). Senza diarization.
+- Su Windows la trascrizione gira sul processore: circa 20-25 minuti per un'ora di audio
+  su un PC recente, fino a un'ora su processori datati. Per andare più veloci: `model.name: small`.
 - Tutto resta in locale, nella cartella `work/`. Contiene anche il
   `.wav` intermedio (~2 MB/min): svuotala quando vuoi.
 
@@ -151,7 +173,8 @@ verso la soluzione più semplice che funziona: libreria standard e funzionalità
 prima di aggiungere dipendenze o codice custom.
 
 Componenti di terze parti: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples)
-(MIT) · [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (Apache-2.0) ·
+(MIT) · [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper) (MIT) ·
+[`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (Apache-2.0) ·
 [Whisper](https://github.com/openai/whisper) (MIT) · [Flask](https://flask.palletsprojects.com)
 (BSD-3) · [python-docx](https://github.com/python-openxml/python-docx) (MIT).
 I pesi dei modelli scaricati da `download_models.py` hanno licenze proprie dei rispettivi autori.
@@ -175,7 +198,7 @@ Vedi [CHANGELOG.md](CHANGELOG.md).
 
 # Sbobyner — in English
 
-*🇮🇹 [Versione italiana sopra].*
+*🇮🇹 [Versione italiana sopra](#sbobiner).*
 
 > Transcribing audio keeps getting harder. Every service is paid or works badly.
 > This won't be perfect, but it does the job. And the file stays on your computer.
@@ -184,34 +207,49 @@ Vedi [CHANGELOG.md](CHANGELOG.md).
 > Install once. Drop in the file. Transcribe (do something else meanwhile). Save the transcript. Done.
 > N.B.: you can't transcribe a concert.
 
-**MAC WITH APPLE SILICON ONLY, FOR NOW**
+Works on **Mac with Apple Silicon** and **Windows 10 / 11** (64-bit).
 
 Transcription pipeline for **lectures and meetings**, built on Whisper.
 Runs entirely **offline** after the initial setup. No account, no token.
 
-Engine: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples/tree/main/whisper)
+Engine: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples/tree/main/whisper) on Mac (GPU),
+[`faster-whisper`](https://github.com/SYSTRAN/faster-whisper) on Windows (CPU).
 Diarization: [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx).
 
 ---
 
 ## Initial setup (first time only, needs internet)
 
-Double-click **`setup.command`**.
+**Mac** — download the ZIP (**Code → Download ZIP**), extract it and double-click **`setup.command`**.
+- If macOS blocks it: **System Settings → Privacy & Security → Open Anyway**
+  (only once, also for `start.command`).
+- Downloads ~460 MB for Whisper + ~35 MB for diarization. Total footprint **~1.1 GB**.
 
-This creates the virtual environment, installs the dependencies and downloads the models
-(~460 MB for Whisper + ~35 MB for diarization). `ffmpeg` is bundled, nothing to install.
-Total install footprint: **~1.1 GB** (`.venv` + models).
+**Windows** — download the ZIP (**Code → Download ZIP**), extract it (e.g. to `C:\Sbobiner`,
+preferably a path without accented letters) and double-click **`setup.bat`**.
+- If *"Windows protected your PC"* shows up: **More info → Run anyway**.
+- If Python is missing, the setup offers to install it (winget): then close and reopen `setup.bat`.
+- Downloads a ~1.6 GB model. Total footprint **~2 GB**, all inside the program folder:
+  deleting it uninstalls everything.
+
+The setup creates the virtual environment, installs the dependencies and downloads the models.
+`ffmpeg` is bundled, nothing to install.
 
 ## Daily use (offline)
 
-Double-click **`start.command`** from Finder.
-The browser opens at `http://127.0.0.1:5000`: drop the file, pick the options, press **Trascrivi** ("Transcribe").
+**Mac** — double-click **`start.command`** from Finder: the browser opens at `http://127.0.0.1:5000`.
+
+**Windows** — double-click **`start.bat`**: a **dedicated Edge window** opens
+(or Chrome, if Edge is missing), with no tabs and no address bar.
+
+Drop the file, pick the options, press **Trascrivi** ("Transcribe").
 When it's done you download as **TXT**, **SRT**, **VTT** or **DOCX**.
 
 Input formats: anything `ffmpeg` can read (mp3, wav, m4a, aac, ogg, flac,
 and video mp4/mkv/mov too — the audio is extracted automatically).
 
-N.B. the terminal window must stay open for Sbobyner to keep serving the web page.
+N.B. the terminal window (the black window on Windows) must stay open for Sbobyner to keep
+serving the web page.
 
 ---
 
@@ -243,12 +281,15 @@ model:
 | `small` | ~500 MB | ~2× faster, less accurate. |
 | `large-v3` | ~3 GB | maximum accuracy, recommended with 16 GB+ of RAM. |
 
-After changing `name`, run `python download_models.py` again (with the `.venv` active) to fetch it:
-it also prints the command to delete the old model from the cache and reclaim space.
+After changing `name`, run the setup again (`setup.command` / `setup.bat`) to fetch it:
+at the end it offers to delete the old model and reclaim space.
 
 Why turbo (and not `large-v3`): it's `large-v3` distilled (8 decoder layers instead of 32),
 transcription accuracy almost identical but faster. The `-q4` variant halves the disk
 size again with minimal quality loss; speed stays about the same.
+
+On **Windows** the sizes above are the Mac ones: there is no 4-bit there, so
+`large-v3-turbo-q4` and `large-v3-turbo` are the same model (~1.6 GB, quantized to int8 at load).
 
 ### Glossary and corrections
 
@@ -298,12 +339,16 @@ section breaks, trigger phrases for sections / action items / decisions. All edi
 | `app.py` + `templates/index.html` | local server and web page |
 | `config.yaml` | all configuration |
 | `download_models.py` | download the models once |
+| `setup.command` / `setup.bat` | installation (Mac / Windows) |
+| `start.command` / `start.bat` | daily launch (Mac / Windows) |
 | `test_pipeline.py` | self-check: `python test_pipeline.py` |
 
 ## Notes
 
 - Speed measured on an 8 GB Mac with `large-v3-turbo-q4`
   (38 min of audio → ~3.5 min of transcription). Without diarization.
+- On Windows transcription runs on the processor: roughly 20-25 minutes per hour of audio
+  on a recent PC, up to an hour on older processors. To go faster: `model.name: small`.
 - Everything stays local, in the `work/` folder. It also holds the intermediate
   `.wav` (~2 MB/min): empty it whenever you want.
 
@@ -315,7 +360,8 @@ toward the simplest thing that works: standard library and native features
 before adding dependencies or custom code.
 
 Third-party components: [`mlx-whisper`](https://github.com/ml-explore/mlx-examples)
-(MIT) · [`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (Apache-2.0) ·
+(MIT) · [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper) (MIT) ·
+[`sherpa-onnx`](https://github.com/k2-fsa/sherpa-onnx) (Apache-2.0) ·
 [Whisper](https://github.com/openai/whisper) (MIT) · [Flask](https://flask.palletsprojects.com)
 (BSD-3) · [python-docx](https://github.com/python-openxml/python-docx) (MIT).
 The model weights downloaded by `download_models.py` have their own licenses from their respective authors.

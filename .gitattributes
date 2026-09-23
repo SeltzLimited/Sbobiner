@@ -1,0 +1,5 @@
+# cmd.exe vuole CRLF (con LF i salti a etichetta si rompono); bash vuole LF.
+# Vale anche per lo ZIP scaricato da GitHub.
+*.bat     text eol=crlf
+*.sh      text eol=lf
+*.command text eol=lf

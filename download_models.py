@@ -41,7 +41,10 @@ def diarization_models():
     if not (seg_dir / "model.int8.onnx").exists():
         _download(SEG_URL, tar)
         with tarfile.open(tar, "r:bz2") as t:
-            t.extractall(MODELS, filter="data")
+            try:
+                t.extractall(MODELS, filter="data")
+            except TypeError:  # Python che non ha ancora il parametro filter
+                t.extractall(MODELS)
         tar.unlink()
         # del tarball teniamo solo il modello che usiamo: via script, licenze, vad, fp32
         for f in seg_dir.iterdir():
@@ -51,25 +54,29 @@ def diarization_models():
 
 
 def whisper_model():
-    from huggingface_hub import snapshot_download
     import transcribe
-    repo = transcribe.repo_for(yaml.safe_load((ROOT / "config.yaml").read_text())["model"]["name"])
-    print(f"  scarico modello Whisper: {repo}")
-    snapshot_download(repo)
-    _hint_stale_models(repo)
+    name = yaml.safe_load((ROOT / "config.yaml").read_text())["model"]["name"]
+    print(f"  scarico modello Whisper: {name}")
+    snapshot = Path(transcribe.download(name))
+    _offer_cleanup(snapshot.parents[1])  # .../models--org--repo/snapshots/<rev>
 
 
-def _hint_stale_models(keep_repo):
-    """Segnala altri modelli Whisper nella cache HF che ora non servono piu'."""
-    hub = Path.home() / ".cache/huggingface/hub"
-    keep = "models--" + keep_repo.replace("/", "--")
-    stale = [d for d in hub.glob("models--mlx-community--whisper-*") if d.name != keep] if hub.exists() else []
-    if stale:
-        tot = sum(f.stat().st_size for d in stale for f in d.rglob("*")
-                  if f.is_file() and not f.is_symlink())
-        print(f"  (puoi liberare ~{tot / 1e9:.1f} GB rimuovendo modelli non piu' usati:)")
-        for d in stale:
-            print(f"     rm -rf {d}")
+def _offer_cleanup(keep_dir):
+    """Propone di eliminare gli altri modelli Whisper in cache (es. dopo un cambio di modello).
+    Usa l'API di huggingface_hub: le versioni recenti condividono i file grossi tra
+    repository, cancellare la cartella a mano non libererebbe spazio."""
+    from huggingface_hub import scan_cache_dir
+    cache = scan_cache_dir(keep_dir.parent)
+    stale = [r for r in cache.repos
+             if "whisper" in r.repo_id.lower() and r.repo_path.name != keep_dir.name]
+    if not stale:
+        return
+    gb = sum(r.size_on_disk for r in stale) / 1e9
+    print(f"  Modelli Whisper non piu' usati: {', '.join(r.repo_id for r in stale)} (~{gb:.1f} GB)")
+    if not sys.stdin.isatty() or input("  Eliminarli per liberare spazio? [s/N] ").strip().lower() != "s":
+        return
+    cache.delete_revisions(*(rev.commit_hash for r in stale for rev in r.revisions)).execute()
+    print("  Eliminati.")
 
 
 if __name__ == "__main__":

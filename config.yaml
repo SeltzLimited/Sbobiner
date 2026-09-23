@@ -13,6 +13,9 @@ model:
   #   - vuoi un filo di precisione in piu' e hai spazio: "large-v3-turbo"
   #   - ancora piu' veloce, meno preciso: "small"
   #   - 16GB+ e massima precisione: "large-v3"
+  # Su Windows i pesi sono diversi: non esiste il 4 bit, "large-v3-turbo-q4" e
+  # "large-v3-turbo" sono lo stesso modello (~1.6GB). Su PC lenti prova "small".
+  # Dopo un cambio rifai il setup per scaricare il nuovo modello.
   name: large-v3-turbo-q4
 
 # Termini iniettati come bias nella trascrizione (nomi propri, sigle, gergo).
